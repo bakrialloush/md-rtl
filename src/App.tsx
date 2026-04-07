@@ -36,10 +36,12 @@ function greet(name: string) {
 
 ## Table
 
-| Name  | Type   | Default |
-|-------|--------|---------|
-| text  | string | ""      |
-| count | number | 0       |
+| Name  | Type    | Default |
+|-------|---------|---------|
+| text  | string  | ""      |
+| count | number  | 0       |
+| test3 | type    | x3      |
+| test4 | type    | y4      |
 
 > Start editing on the left — or paste your own markdown.
 `
