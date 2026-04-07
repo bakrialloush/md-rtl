@@ -196,6 +196,8 @@
 
 .markdown-body blockquote {
   border-left: 3px solid var(--accent);
+  background: var(--accent-bg);
+  border-radius: 4px;
   margin: 1em 0;
   padding: 4px 0 4px 16px;
   color: var(--text);
