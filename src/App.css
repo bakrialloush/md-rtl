@@ -53,6 +53,33 @@
   border-bottom: 1px solid var(--border);
   background: var(--code-bg);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dir-toggle {
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.dir-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dir-toggle.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 /* Textarea */

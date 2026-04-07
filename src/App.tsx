@@ -36,6 +36,7 @@ function greet(name: string) {
 
 export default function App() {
   const [content, setContent] = useState(INITIAL_CONTENT)
+  const [rtl, setRtl] = useState(false)
 
   return (
     <div className="app">
@@ -54,8 +55,17 @@ export default function App() {
         </div>
 
         <div className="pane pane-preview">
-          <div className="pane-label">Preview</div>
-          <div className="markdown-body">
+          <div className="pane-label">
+            Preview
+            <button
+              className={`dir-toggle ${rtl ? 'active' : ''}`}
+              onClick={() => setRtl((v) => !v)}
+              title="Toggle text direction"
+            >
+              {rtl ? 'RTL' : 'LTR'}
+            </button>
+          </div>
+          <div className="markdown-body" dir={rtl ? 'rtl' : 'ltr'}>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {content}
             </ReactMarkdown>
