@@ -136,7 +136,12 @@ export default function App() {
   const [content, setContent] = useState(INITIAL_CONTENT)
   const [rtl, setRtl] = useState(true)
   const [theme, setTheme] = useState<ThemeKey>('blue')
+  const [previewLen, setPreviewLen] = useState(0)
   const previewRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setPreviewLen(previewRef.current?.innerText.replace(/\n/g, '').length ?? 0)
+  }, [content])
 
   return (
     <div className="app">
@@ -200,6 +205,16 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      <footer className="statusbar">
+        <span>
+          Powered by{' '}
+          <a href="https://github.com/bakrialloush/" target="_blank" rel="noreferrer">
+            Bakri Alloush
+          </a>
+        </span>
+        <span>{previewLen.toLocaleString()} chars</span>
+      </footer>
     </div>
   )
 }
