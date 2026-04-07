@@ -17,6 +17,23 @@
   flex-shrink: 0;
 }
 
+.sync-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text);
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sync-label input[type='checkbox'] {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 .toolbar-title {
   font-family: var(--mono);
   font-size: 14px;

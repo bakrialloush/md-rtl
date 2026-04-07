@@ -137,16 +137,49 @@ export default function App() {
   const [rtl, setRtl] = useState(true)
   const [theme, setTheme] = useState<ThemeKey>('blue')
   const [previewLen, setPreviewLen] = useState(0)
+  const [syncScroll, setSyncScroll] = useState(true)
   const previewRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const syncingFrom = useRef<'editor' | 'preview' | null>(null)
 
   useEffect(() => {
     setPreviewLen(previewRef.current?.innerText.replace(/\n/g, '').length ?? 0)
   }, [content])
 
+  const handleEditorScroll = () => {
+    if (!syncScroll || syncingFrom.current === 'preview') return
+    const editor = textareaRef.current
+    const preview = previewRef.current
+    if (!editor || !preview) return
+    syncingFrom.current = 'editor'
+    const ratio = editor.scrollTop / (editor.scrollHeight - editor.clientHeight)
+    preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight)
+    syncingFrom.current = null
+  }
+
+  const handlePreviewScroll = () => {
+    if (!syncScroll || syncingFrom.current === 'editor') return
+    const editor = textareaRef.current
+    const preview = previewRef.current
+    if (!editor || !preview) return
+    syncingFrom.current = 'preview'
+    const ratio = preview.scrollTop / (preview.scrollHeight - preview.clientHeight)
+    editor.scrollTop = ratio * (editor.scrollHeight - editor.clientHeight)
+    syncingFrom.current = null
+  }
+
   return (
     <div className="app">
       <header className="toolbar">
         <span className="toolbar-title">md editor</span>
+        <label className="sync-label">
+          <input
+            type="checkbox"
+            checked={syncScroll}
+            onChange={(e) => setSyncScroll(e.target.checked)}
+          />
+          sync scroll
+        </label>
       </header>
 
       <main className="editor-area">
@@ -156,8 +189,10 @@ export default function App() {
             <CopyButton getText={() => content} />
           </div>
           <textarea
+            ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            onScroll={handleEditorScroll}
             spellCheck={false}
           />
         </div>
@@ -194,6 +229,7 @@ export default function App() {
             className="markdown-body"
             dir={rtl ? 'rtl' : 'ltr'}
             ref={previewRef}
+            onScroll={handlePreviewScroll}
             style={{
               '--accent': THEMES[theme].accent,
               '--accent-bg': THEMES[theme].accentBg,
