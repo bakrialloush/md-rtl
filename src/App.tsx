@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './App.css'
@@ -105,6 +105,12 @@ echo greet("Bakri");
 function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () => string }) {
   const [copied, setCopied] = useState(false)
 
+  useEffect(() => {
+    if (!copied) return
+    const timer = setTimeout(() => setCopied(false), 2000)
+    return () => clearTimeout(timer)
+  }, [copied])
+
   const handleCopy = async () => {
     if (getHtml) {
       await navigator.clipboard.write([
@@ -117,11 +123,10 @@ function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () 
       await navigator.clipboard.writeText(getText())
     }
     setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy}>
+    <button className={`pane-btn ${copied ? 'copied' : ''}`} onClick={handleCopy}>
       {copied ? 'Copied!' : 'Copy'}
     </button>
   )
@@ -129,8 +134,8 @@ function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () 
 
 export default function App() {
   const [content, setContent] = useState(INITIAL_CONTENT)
-  const [rtl, setRtl] = useState(false)
-  const [theme, setTheme] = useState<ThemeKey>('purple')
+  const [rtl, setRtl] = useState(true)
+  const [theme, setTheme] = useState<ThemeKey>('blue')
   const previewRef = useRef<HTMLDivElement>(null)
 
   return (
@@ -172,7 +177,7 @@ export default function App() {
                 getHtml={() => previewRef.current?.innerHTML ?? ''}
               />
               <button
-                className={`dir-toggle ${rtl ? 'active' : ''}`}
+                className={`pane-btn ${rtl ? 'active' : ''}`}
                 onClick={() => setRtl((v) => !v)}
                 title="Toggle text direction"
               >

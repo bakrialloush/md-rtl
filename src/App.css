@@ -64,7 +64,7 @@
   gap: 6px;
 }
 
-.copy-btn {
+.pane-btn {
   font-size: 11px;
   font-family: var(--mono);
   padding: 2px 8px;
@@ -77,36 +77,13 @@
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.copy-btn:hover {
+.pane-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.copy-btn.copied {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-
-.dir-toggle {
-  font-size: 11px;
-  font-family: var(--mono);
-  padding: 2px 8px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  letter-spacing: 0.05em;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.dir-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.dir-toggle.active {
+.pane-btn.active,
+.pane-btn.copied {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
