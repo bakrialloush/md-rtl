@@ -3,6 +3,16 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './App.css'
 
+const THEMES = {
+  purple: { label: 'Purple', accent: '#aa3bff', accentBg: 'rgba(170,59,255,0.1)' },
+  blue:   { label: 'Blue',   accent: '#3b82f6', accentBg: 'rgba(59,130,246,0.1)'  },
+  red:    { label: 'Red',    accent: '#ef4444', accentBg: 'rgba(239,68,68,0.1)'   },
+  green:  { label: 'Green',  accent: '#22c55e', accentBg: 'rgba(34,197,94,0.1)'   },
+  black:  { label: 'Black',  accent: '#374151', accentBg: 'rgba(55,65,81,0.1)'    },
+} as const
+
+type ThemeKey = keyof typeof THEMES
+
 const INITIAL_CONTENT = `# Hello, Markdown!
 
 Write your **markdown** here and toggle to see the _rendered_ output.
@@ -62,6 +72,7 @@ function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () 
 export default function App() {
   const [content, setContent] = useState(INITIAL_CONTENT)
   const [rtl, setRtl] = useState(false)
+  const [theme, setTheme] = useState<ThemeKey>('purple')
   const previewRef = useRef<HTMLDivElement>(null)
 
   return (
@@ -87,6 +98,17 @@ export default function App() {
           <div className="pane-label">
             Preview
             <div className="pane-actions">
+              <div className="theme-swatches">
+                {(Object.keys(THEMES) as ThemeKey[]).map((key) => (
+                  <button
+                    key={key}
+                    className={`theme-swatch ${theme === key ? 'active' : ''}`}
+                    style={{ '--swatch-color': THEMES[key].accent } as React.CSSProperties}
+                    onClick={() => setTheme(key)}
+                    title={THEMES[key].label}
+                  />
+                ))}
+              </div>
               <CopyButton
                 getText={() => previewRef.current?.innerText ?? ''}
                 getHtml={() => previewRef.current?.innerHTML ?? ''}
@@ -100,7 +122,15 @@ export default function App() {
               </button>
             </div>
           </div>
-          <div className="markdown-body" dir={rtl ? 'rtl' : 'ltr'} ref={previewRef}>
+          <div
+            className="markdown-body"
+            dir={rtl ? 'rtl' : 'ltr'}
+            ref={previewRef}
+            style={{
+              '--accent': THEMES[theme].accent,
+              '--accent-bg': THEMES[theme].accentBg,
+            } as React.CSSProperties}
+          >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {content}
             </ReactMarkdown>
