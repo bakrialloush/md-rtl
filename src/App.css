@@ -183,6 +183,9 @@
   border-radius: 6px;
   padding: 16px;
   overflow-x: auto;
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
 }
 
 .markdown-body pre code {
