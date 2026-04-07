@@ -102,6 +102,28 @@ echo greet("Bakri");
 * يمكن دمج أكثر من ميزة في نفس السطر: **نص عريض مع [رابط](https://example.com)**.
 `
 
+const INLINE_PROPS = [
+  'color', 'background-color',
+  'border-left', 'border-right', 'border-top', 'border-bottom',
+  'font-size', 'font-weight', 'font-style', 'font-family',
+  'text-decoration', 'padding', 'margin',
+  'direction', 'unicode-bidi',
+]
+
+function inlineStyles(root: HTMLElement): string {
+  const clone = root.cloneNode(true) as HTMLElement
+  const origEls = Array.from(root.querySelectorAll<HTMLElement>('*'))
+  const cloneEls = Array.from(clone.querySelectorAll<HTMLElement>('*'))
+  origEls.forEach((orig, i) => {
+    const cs = getComputedStyle(orig)
+    for (const prop of INLINE_PROPS) {
+      const val = cs.getPropertyValue(prop)
+      if (val) cloneEls[i].style.setProperty(prop, val)
+    }
+  })
+  return `<!DOCTYPE html><html><body>${clone.outerHTML}</body></html>`
+}
+
 function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () => string }) {
   const [copied, setCopied] = useState(false)
 
@@ -214,7 +236,7 @@ export default function App() {
               </div>
               <CopyButton
                 getText={() => previewRef.current?.innerText ?? ''}
-                getHtml={() => previewRef.current?.innerHTML ?? ''}
+                getHtml={() => previewRef.current ? inlineStyles(previewRef.current) : ''}
               />
               <button
                 className={`pane-btn ${rtl ? 'active' : ''}`}
