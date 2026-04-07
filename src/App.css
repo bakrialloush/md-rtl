@@ -217,6 +217,10 @@
   accent-color: var(--accent);
 }
 
+.markdown-body li:has(> input[type='checkbox']) {
+  list-style: none;
+}
+
 /* GFM tables */
 .markdown-body table {
   border-collapse: collapse;
