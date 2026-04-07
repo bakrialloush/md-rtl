@@ -13,37 +13,93 @@ const THEMES = {
 
 type ThemeKey = keyof typeof THEMES
 
-const INITIAL_CONTENT = `# Hello, Markdown!
+const INITIAL_CONTENT = `# 📌 عنوان رئيسي (H1)
 
-Write your **markdown** here and toggle to see the _rendered_ output.
+## 🔹 عنوان فرعي (H2)
 
-## Features
+نص عادي يحتوي على **خط عريض** و *خط مائل* و ***كلاهما***، مع استخدام \`inline code\` داخل الجملة.
 
-- [x] Bold, italic, strikethrough
-- [x] Headings
-- [x] Lists (ordered & unordered)
-- [x] Links and images
-- [x] Code blocks
-- [x] Tables
+> هذا اقتباس (blockquote)
+>
+> > اقتباس متداخل
 
-## Code Example
+---
 
-\`\`\`ts
-function greet(name: string) {
-  return \`Hello, \${name}!\`
+### 📋 قائمة غير مرتبة
+
+* عنصر أول
+* عنصر ثاني
+
+  * عنصر فرعي
+  * عنصر فرعي آخر
+* عنصر ثالث
+
+### 🔢 قائمة مرتبة
+
+1. خطوة أولى
+2. خطوة ثانية
+
+   1. خطوة فرعية
+   2. خطوة فرعية أخرى
+3. خطوة ثالثة
+
+---
+
+### 🔗 روابط وصور
+
+[اذهب إلى Google](https://www.google.com)
+
+![صورة تجريبية](https://placehold.co/300)
+
+---
+
+### 💻 كود برمجي
+
+\`\`\`javascript
+function calculateTotal(price, tax) {
+  const total = price + (price * tax);
+  return total.toFixed(2);
 }
+
+console.log(calculateTotal(100, 0.15));
 \`\`\`
 
-## Table
+\`\`\`php
+<?php
+function greet($name) {
+    return "Hello, " . $name;
+}
+echo greet("Bakri");
+\`\`\`
 
-| Name  | Type    | Default |
-|-------|---------|---------|
-| text  | string  | ""      |
-| count | number  | 0       |
-| test3 | type    | x3      |
-| test4 | type    | y4      |
+---
 
-> Start editing on the left — or paste your own markdown.
+### 📊 جدول
+
+| الاسم | العمر | الوظيفة     |
+| ----- | ----- | ----------- |
+| أحمد  | 28    | مطور        |
+| سارة  | 32    | مصممة       |
+| خالد  | 25    | محلل بيانات |
+| بكري  | 38    | مهندس برمجيات |
+
+
+---
+
+### ⚠️ قائمة مهام (Task List)
+
+* [x] إنشاء المشروع
+* [x] كتابة الكود
+* [ ] اختبار النظام
+* [ ] النشر
+
+---
+
+### 🧠 ملاحظات إضافية
+
+* يمكن استخدام ~~نص مشطوب~~ عند الحاجة.
+* دعم الرموز التعبيرية 😄.
+* يمكن دمج أكثر من ميزة في نفس السطر: **نص عريض مع [رابط](https://example.com)**.
 `
 
 function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () => string }) {
