@@ -4,6 +4,8 @@ import remarkGfm from 'remark-gfm'
 import './App.css'
 import appCss from './App.css?raw'
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+
 const THEMES = {
   purple: { label: 'Purple', accent: '#aa3bff', accentBg: 'rgba(170,59,255,0.1)' },
   blue:   { label: 'Blue',   accent: '#3b82f6', accentBg: 'rgba(59,130,246,0.1)'  },
@@ -13,6 +15,14 @@ const THEMES = {
 } as const
 
 type ThemeKey = keyof typeof THEMES
+
+const INLINE_PROPS = [
+  'color', 'background-color',
+  'border-left', 'border-right', 'border-top', 'border-bottom',
+  'font-size', 'font-weight', 'font-style', 'font-family',
+  'text-decoration', 'padding', 'margin',
+  'direction', 'unicode-bidi',
+]
 
 const INITIAL_CONTENT = `# 📌 عنوان رئيسي (H1)
 
@@ -103,17 +113,11 @@ echo greet("Bakri");
 * يمكن دمج أكثر من ميزة في نفس السطر: **نص عريض مع [رابط](https://example.com)**.
 `
 
-const INLINE_PROPS = [
-  'color', 'background-color',
-  'border-left', 'border-right', 'border-top', 'border-bottom',
-  'font-size', 'font-weight', 'font-style', 'font-family',
-  'text-decoration', 'padding', 'margin',
-  'direction', 'unicode-bidi',
-]
+// ─── Export helpers ───────────────────────────────────────────────────────────
 
 function inlineStyles(root: HTMLElement): string {
   const clone = root.cloneNode(true) as HTMLElement
-  const origEls = Array.from(root.querySelectorAll<HTMLElement>('*'))
+  const origEls  = Array.from(root.querySelectorAll<HTMLElement>('*'))
   const cloneEls = Array.from(clone.querySelectorAll<HTMLElement>('*'))
   origEls.forEach((orig, i) => {
     const cs = getComputedStyle(orig)
@@ -125,7 +129,7 @@ function inlineStyles(root: HTMLElement): string {
   return `<!DOCTYPE html><html><body>${clone.outerHTML}</body></html>`
 }
 
-function generateExportHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean): string {
+function buildPageHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean, extraStyles = ''): string {
   const { accent, accentBg } = THEMES[theme]
   const dir = rtl ? 'rtl' : 'ltr'
   return `<!DOCTYPE html>
@@ -136,13 +140,8 @@ function generateExportHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean): s
   <title>Exported Document</title>
   <style>
     :root {
-      --text: #6b6375;
-      --text-h: #08060d;
-      --bg: #fff;
-      --border: #e5e4e7;
-      --code-bg: #f4f3ec;
-      --accent: ${accent};
-      --accent-bg: ${accentBg};
+      --text: #6b6375; --text-h: #08060d; --bg: #fff; --border: #e5e4e7;
+      --code-bg: #f4f3ec; --accent: ${accent}; --accent-bg: ${accentBg};
       --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
       --mono: ui-monospace, Consolas, monospace;
       font: 18px/145% var(--sans);
@@ -153,23 +152,14 @@ function generateExportHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean): s
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --text: #9ca3af;
-        --text-h: #f3f4f6;
-        --bg: #16171d;
-        --border: #2e303a;
-        --code-bg: #1f2028;
+        --text: #9ca3af; --text-h: #f3f4f6; --bg: #16171d;
+        --border: #2e303a; --code-bg: #1f2028;
       }
     }
     body { margin: 0; background: var(--bg); }
     ${appCss}
-    .markdown-body {
-      flex: unset;
-      overflow-y: unset;
-      height: unset;
-      max-width: 780px;
-      margin: 40px auto;
-      padding: 40px;
-    }
+    .markdown-body { flex: unset; overflow-y: unset; height: unset; max-width: 780px; margin: 40px auto; padding: 40px; }
+    ${extraStyles}
   </style>
 </head>
 <body>
@@ -178,23 +168,30 @@ function generateExportHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean): s
 </html>`
 }
 
-function ExportButton({ getHtml }: { getHtml: () => string }) {
-  const handleExport = () => {
-    const html = getHtml()
-    const blob = new Blob([html], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'export.html'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-  return (
-    <button className="pane-btn" onClick={handleExport}>
-      Export HTML
-    </button>
-  )
+function downloadHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean): void {
+  const html = buildPageHtml(root, theme, rtl)
+  const url  = URL.createObjectURL(new Blob([html], { type: 'text/html' }))
+  const a    = Object.assign(document.createElement('a'), { href: url, download: 'export.html' })
+  a.click()
+  URL.revokeObjectURL(url)
 }
+
+function printAsPage(root: HTMLElement, theme: ThemeKey, rtl: boolean): void {
+  const pageStyle = `@media print { .markdown-body { margin: 0; padding: 0; max-width: 100%; width: 100%; } }`
+  const html = buildPageHtml(root, theme, rtl, pageStyle)
+  const win  = window.open('', '_blank')
+  if (!win) return
+  win.document.write(html)
+  win.document.close()
+  win.onafterprint = () => win.close()
+  if (win.document.readyState === 'complete') {
+    win.print()
+  } else {
+    win.onload = () => win.print()
+  }
+}
+
+// ─── Components ───────────────────────────────────────────────────────────────
 
 function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () => string }) {
   const [copied, setCopied] = useState(false)
@@ -209,7 +206,7 @@ function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () 
     if (getHtml) {
       await navigator.clipboard.write([
         new ClipboardItem({
-          'text/html': new Blob([getHtml()], { type: 'text/html' }),
+          'text/html':  new Blob([getHtml()],  { type: 'text/html'  }),
           'text/plain': new Blob([getText()], { type: 'text/plain' }),
         }),
       ])
@@ -226,15 +223,17 @@ function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () 
   )
 }
 
+// ─── App ─────────────────────────────────────────────────────────────────────
+
 export default function App() {
-  const [content, setContent] = useState(INITIAL_CONTENT)
-  const [rtl, setRtl] = useState(true)
-  const [theme, setTheme] = useState<ThemeKey>('blue')
+  const [content, setContent]     = useState(INITIAL_CONTENT)
+  const [rtl, setRtl]             = useState(true)
+  const [theme, setTheme]         = useState<ThemeKey>('blue')
   const [previewLen, setPreviewLen] = useState(0)
   const [syncScroll, setSyncScroll] = useState(true)
-  const previewRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const syncingFrom = useRef<'editor' | 'preview' | null>(null)
+  const previewRef   = useRef<HTMLDivElement>(null)
+  const textareaRef  = useRef<HTMLTextAreaElement>(null)
+  const syncingFrom  = useRef<'editor' | 'preview' | null>(null)
 
   useEffect(() => {
     setPreviewLen(previewRef.current?.innerText.replace(/\n/g, '').length ?? 0)
@@ -242,7 +241,7 @@ export default function App() {
 
   const handleEditorScroll = () => {
     if (!syncScroll || syncingFrom.current === 'preview') return
-    const editor = textareaRef.current
+    const editor  = textareaRef.current
     const preview = previewRef.current
     if (!editor || !preview) return
     syncingFrom.current = 'editor'
@@ -253,7 +252,7 @@ export default function App() {
 
   const handlePreviewScroll = () => {
     if (!syncScroll || syncingFrom.current === 'editor') return
-    const editor = textareaRef.current
+    const editor  = textareaRef.current
     const preview = previewRef.current
     if (!editor || !preview) return
     syncingFrom.current = 'preview'
@@ -310,9 +309,18 @@ export default function App() {
                 getText={() => previewRef.current?.innerText ?? ''}
                 getHtml={() => previewRef.current ? inlineStyles(previewRef.current) : ''}
               />
-              <ExportButton
-                getHtml={() => previewRef.current ? generateExportHtml(previewRef.current, theme, rtl) : ''}
-              />
+              <button
+                className="pane-btn"
+                onClick={() => previewRef.current && downloadHtml(previewRef.current, theme, rtl)}
+              >
+                Export HTML
+              </button>
+              <button
+                className="pane-btn"
+                onClick={() => previewRef.current && printAsPage(previewRef.current, theme, rtl)}
+              >
+                Export PDF
+              </button>
               <button
                 className={`pane-btn ${rtl ? 'active' : ''}`}
                 onClick={() => setRtl((v) => !v)}
@@ -328,7 +336,7 @@ export default function App() {
             ref={previewRef}
             onScroll={handlePreviewScroll}
             style={{
-              '--accent': THEMES[theme].accent,
+              '--accent':    THEMES[theme].accent,
               '--accent-bg': THEMES[theme].accentBg,
             } as React.CSSProperties}
           >
