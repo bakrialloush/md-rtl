@@ -63,3 +63,4 @@ Both export buttons are in the preview toolbar:
 **Bakri Alloush**
 - Website: [bakrialloush.com](https://bakrialloush.com)
 - GitHub: [github.com/bakrialloush](https://github.com/bakrialloush)
+- Preview: [bakrialloush.github.io/md-rtl](https://bakrialloush.github.io/md-rtl)
