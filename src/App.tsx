@@ -89,10 +89,10 @@ echo greet("Bakri");
 
 | الاسم | العمر | الوظيفة     |
 | ----- | ----- | ----------- |
+| بكري  | 39    | مهندس برمجيات |
 | أحمد  | 28    | مطور        |
 | سارة  | 32    | مصممة       |
 | خالد  | 25    | محلل بيانات |
-| بكري  | 38    | مهندس برمجيات |
 
 
 ---
@@ -179,16 +179,11 @@ function downloadHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean): void {
 function printAsPage(root: HTMLElement, theme: ThemeKey, rtl: boolean): void {
   const pageStyle = `@media print { .markdown-body { margin: 0; padding: 0; max-width: 100%; width: 100%; } }`
   const html = buildPageHtml(root, theme, rtl, pageStyle)
-  const win  = window.open('', '_blank')
-  if (!win) return
-  win.document.write(html)
-  win.document.close()
+  const url  = URL.createObjectURL(new Blob([html], { type: 'text/html' }))
+  const win  = window.open(url, '_blank')
+  if (!win) { URL.revokeObjectURL(url); return }
   win.onafterprint = () => win.close()
-  if (win.document.readyState === 'complete') {
-    win.print()
-  } else {
-    win.onload = () => win.print()
-  }
+  win.onload = () => { win.print(); URL.revokeObjectURL(url) }
 }
 
 // ─── Components ───────────────────────────────────────────────────────────────
@@ -264,7 +259,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="toolbar">
-        <span className="toolbar-title">md editor</span>
+        <span className="toolbar-title">Md Rtl Viewer</span>
         <label className="sync-label">
           <input
             type="checkbox"
