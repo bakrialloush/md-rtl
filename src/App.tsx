@@ -258,7 +258,13 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div
+      className="app"
+      style={{
+        '--accent':    THEMES[theme].accent,
+        '--accent-bg': THEMES[theme].accentBg,
+      } as React.CSSProperties}
+    >
       <header className="toolbar">
         <span className="toolbar-title">Md Rtl Viewer</span>
         <div className="mobile-tabs">
@@ -345,10 +351,6 @@ export default function App() {
             dir={rtl ? 'rtl' : 'ltr'}
             ref={previewRef}
             onScroll={handlePreviewScroll}
-            style={{
-              '--accent':    THEMES[theme].accent,
-              '--accent-bg': THEMES[theme].accentBg,
-            } as React.CSSProperties}
           >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {content}
