@@ -7,8 +7,8 @@ import appCss from './App.css?raw'
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const THEMES = {
-  purple: { label: 'Purple', accent: '#aa3bff', accentBg: 'rgba(170,59,255,0.1)' },
   blue:   { label: 'Blue',   accent: '#3b82f6', accentBg: 'rgba(59,130,246,0.1)'  },
+  purple: { label: 'Purple', accent: '#aa3bff', accentBg: 'rgba(170,59,255,0.1)' },
   red:    { label: 'Red',    accent: '#ef4444', accentBg: 'rgba(239,68,68,0.1)'   },
   green:  { label: 'Green',  accent: '#22c55e', accentBg: 'rgba(34,197,94,0.1)'   },
   black:  { label: 'Black',  accent: '#374151', accentBg: 'rgba(55,65,81,0.1)'    },
@@ -226,6 +226,7 @@ export default function App() {
   const [theme, setTheme]         = useState<ThemeKey>('blue')
   const [previewLen, setPreviewLen] = useState(0)
   const [syncScroll, setSyncScroll] = useState(true)
+  const [activeTab, setActiveTab]   = useState<'editor' | 'preview'>('editor')
   const previewRef   = useRef<HTMLDivElement>(null)
   const textareaRef  = useRef<HTMLTextAreaElement>(null)
   const syncingFrom  = useRef<'editor' | 'preview' | null>(null)
@@ -260,6 +261,20 @@ export default function App() {
     <div className="app">
       <header className="toolbar">
         <span className="toolbar-title">Md Rtl Viewer</span>
+        <div className="mobile-tabs">
+          <button
+            className={`tab-btn ${activeTab === 'editor' ? 'active' : ''}`}
+            onClick={() => setActiveTab('editor')}
+          >
+            Markdown
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'preview' ? 'active' : ''}`}
+            onClick={() => setActiveTab('preview')}
+          >
+            Preview
+          </button>
+        </div>
         <label className="sync-label">
           <input
             type="checkbox"
@@ -271,7 +286,7 @@ export default function App() {
       </header>
 
       <main className="editor-area">
-        <div className="pane pane-editor">
+        <div className={`pane pane-editor ${activeTab !== 'editor' ? 'tab-hidden' : ''}`}>
           <div className="pane-label">
             Markdown
             <CopyButton getText={() => content} />
@@ -285,7 +300,7 @@ export default function App() {
           />
         </div>
 
-        <div className="pane pane-preview">
+        <div className={`pane pane-preview ${activeTab !== 'preview' ? 'tab-hidden' : ''}`}>
           <div className="pane-label">
             Preview
             <div className="pane-actions">
