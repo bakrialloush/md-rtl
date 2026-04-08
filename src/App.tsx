@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './App.css'
+import appCss from './App.css?raw'
 
 const THEMES = {
   purple: { label: 'Purple', accent: '#aa3bff', accentBg: 'rgba(170,59,255,0.1)' },
@@ -124,6 +125,77 @@ function inlineStyles(root: HTMLElement): string {
   return `<!DOCTYPE html><html><body>${clone.outerHTML}</body></html>`
 }
 
+function generateExportHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean): string {
+  const { accent, accentBg } = THEMES[theme]
+  const dir = rtl ? 'rtl' : 'ltr'
+  return `<!DOCTYPE html>
+<html lang="${rtl ? 'ar' : 'en'}" dir="${dir}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exported Document</title>
+  <style>
+    :root {
+      --text: #6b6375;
+      --text-h: #08060d;
+      --bg: #fff;
+      --border: #e5e4e7;
+      --code-bg: #f4f3ec;
+      --accent: ${accent};
+      --accent-bg: ${accentBg};
+      --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+      --mono: ui-monospace, Consolas, monospace;
+      font: 18px/145% var(--sans);
+      letter-spacing: 0.18px;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text: #9ca3af;
+        --text-h: #f3f4f6;
+        --bg: #16171d;
+        --border: #2e303a;
+        --code-bg: #1f2028;
+      }
+    }
+    body { margin: 0; background: var(--bg); }
+    ${appCss}
+    .markdown-body {
+      flex: unset;
+      overflow-y: unset;
+      height: unset;
+      max-width: 780px;
+      margin: 40px auto;
+      padding: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="markdown-body" dir="${dir}">${root.innerHTML}</div>
+</body>
+</html>`
+}
+
+function ExportButton({ getHtml }: { getHtml: () => string }) {
+  const handleExport = () => {
+    const html = getHtml()
+    const blob = new Blob([html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'export.html'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+  return (
+    <button className="pane-btn" onClick={handleExport}>
+      Export HTML
+    </button>
+  )
+}
+
 function CopyButton({ getText, getHtml }: { getText: () => string; getHtml?: () => string }) {
   const [copied, setCopied] = useState(false)
 
@@ -237,6 +309,9 @@ export default function App() {
               <CopyButton
                 getText={() => previewRef.current?.innerText ?? ''}
                 getHtml={() => previewRef.current ? inlineStyles(previewRef.current) : ''}
+              />
+              <ExportButton
+                getHtml={() => previewRef.current ? generateExportHtml(previewRef.current, theme, rtl) : ''}
               />
               <button
                 className={`pane-btn ${rtl ? 'active' : ''}`}
