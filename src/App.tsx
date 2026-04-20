@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 import './App.css'
 import appCss from './App.css?raw'
 
@@ -111,6 +114,26 @@ echo greet("Bakri");
 * يمكن استخدام ~~نص مشطوب~~ عند الحاجة.
 * دعم الرموز التعبيرية 😄.
 * يمكن دمج أكثر من ميزة في نفس السطر: **نص عريض مع [رابط](https://example.com)**.
+
+---
+
+### 🔢 معادلات LaTeX
+
+معادلة مضمّنة في النص: $E = mc^2$ أو $a^2 + b^2 = c^2$.
+
+معادلة في سطر مستقل:
+
+$$
+\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}
+$$
+
+$$
+\\frac{d}{dx}\\left(\\int_{a}^{x} f(t)\\,dt\\right) = f(x)
+$$
+
+$$
+\\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6}
+$$
 `
 
 // ─── Export helpers ───────────────────────────────────────────────────────────
@@ -138,6 +161,7 @@ function buildPageHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean, extraSt
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Exported Document</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
   <style>
     :root {
       --text: #6b6375; --text-h: #08060d; --bg: #fff; --border: #e5e4e7;
@@ -352,7 +376,7 @@ export default function App() {
             ref={previewRef}
             onScroll={handlePreviewScroll}
           >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
               {content}
             </ReactMarkdown>
           </div>
