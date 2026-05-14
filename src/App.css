@@ -378,17 +378,17 @@
     display: none;
   }
 
-  .pane-divider + .pane {
-    border-top: 1px solid var(--border);
-  }
-
   .editor-area {
     flex-direction: column;
   }
 
+  .pane {
+    width: 100% !important;
+    flex: 1 !important;
+  }
+
   .pane + .pane {
     border-left: none;
-    border-top: 1px solid var(--border);
   }
 
   .pane.tab-hidden {
