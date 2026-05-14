@@ -182,7 +182,7 @@ function buildPageHtml(root: HTMLElement, theme: ThemeKey, rtl: boolean, extraSt
     }
     body { margin: 0; background: var(--bg); }
     ${appCss}
-    .markdown-body { flex: unset; overflow-y: unset; height: unset; max-width: 780px; margin: 40px auto; padding: 40px; }
+    .markdown-body { flex: unset; overflow-y: unset; height: unset; margin: 40px auto; padding: 40px; }
     ${extraStyles}
   </style>
 </head>
@@ -251,9 +251,31 @@ export default function App() {
   const [previewLen, setPreviewLen] = useState(0)
   const [syncScroll, setSyncScroll] = useState(true)
   const [activeTab, setActiveTab]   = useState<'editor' | 'preview'>('editor')
+  const [hiddenPane, setHiddenPane] = useState<'editor' | 'preview' | null>(null)
+  const [editorWidth, setEditorWidth] = useState(50)
+  const [dragging, setDragging]       = useState(false)
   const previewRef   = useRef<HTMLDivElement>(null)
   const textareaRef  = useRef<HTMLTextAreaElement>(null)
+  const editorAreaRef = useRef<HTMLDivElement>(null)
   const syncingFrom  = useRef<'editor' | 'preview' | null>(null)
+
+  const handleDividerMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setDragging(true)
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!editorAreaRef.current) return
+      const rect = editorAreaRef.current.getBoundingClientRect()
+      const pct = ((ev.clientX - rect.left) / rect.width) * 100
+      setEditorWidth(Math.min(Math.max(pct, 20), 80))
+    }
+    const onMouseUp = () => {
+      setDragging(false)
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+    }
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+  }
 
   useEffect(() => {
     setPreviewLen(previewRef.current?.innerText.replace(/\n/g, '').length ?? 0)
@@ -283,7 +305,7 @@ export default function App() {
 
   return (
     <div
-      className="app"
+      className={`app${dragging ? ' dragging' : ''}`}
       style={{
         '--accent':    THEMES[theme].accent,
         '--accent-bg': THEMES[theme].accentBg,
@@ -315,11 +337,23 @@ export default function App() {
         </label>
       </header>
 
-      <main className="editor-area">
-        <div className={`pane pane-editor ${activeTab !== 'editor' ? 'tab-hidden' : ''}`}>
+      <main className="editor-area" ref={editorAreaRef}>
+        <div
+          className={`pane pane-editor ${activeTab !== 'editor' ? 'tab-hidden' : ''} ${hiddenPane === 'editor' ? 'pane-hidden' : ''}`}
+          style={hiddenPane === null ? { flex: 'none', width: `${editorWidth}%` } : undefined}
+        >
           <div className="pane-label">
             Markdown
-            <CopyButton getText={() => content} />
+            <div className="pane-actions">
+              <CopyButton getText={() => content} />
+              <button
+                className="pane-btn pane-collapse-btn"
+                onClick={() => setHiddenPane(h => h === 'preview' ? null : 'preview')}
+                title={hiddenPane === 'preview' ? 'Show preview' : 'Hide preview'}
+              >
+                {hiddenPane === 'preview' ? '◀' : '▶'}
+              </button>
+            </div>
           </div>
           <textarea
             ref={textareaRef}
@@ -330,10 +364,24 @@ export default function App() {
           />
         </div>
 
-        <div className={`pane pane-preview ${activeTab !== 'preview' ? 'tab-hidden' : ''}`}>
+        {hiddenPane === null && (
+          <div
+            className={`pane-divider${dragging ? ' dragging' : ''}`}
+            onMouseDown={handleDividerMouseDown}
+          />
+        )}
+
+        <div className={`pane pane-preview ${activeTab !== 'preview' ? 'tab-hidden' : ''} ${hiddenPane === 'preview' ? 'pane-hidden' : ''}`}>
           <div className="pane-label">
             Preview
             <div className="pane-actions">
+              <button
+                className="pane-btn pane-collapse-btn"
+                onClick={() => setHiddenPane(h => h === 'editor' ? null : 'editor')}
+                title={hiddenPane === 'editor' ? 'Show editor' : 'Hide editor'}
+              >
+                {hiddenPane === 'editor' ? '▶' : '◀'}
+              </button>
               <div className="theme-swatches">
                 {(Object.keys(THEMES) as ThemeKey[]).map((key) => (
                   <button

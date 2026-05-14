@@ -131,7 +131,6 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px 32px;
-  max-width: 780px;
   line-height: 1.7;
   height: 100%;
   box-sizing: border-box;
@@ -312,6 +311,30 @@
   margin: 2em 0;
 }
 
+/* Pane collapse */
+.pane-hidden {
+  display: none;
+}
+
+/* Resizable divider */
+.pane-divider {
+  width: 4px;
+  background: var(--border);
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.pane-divider:hover,
+.pane-divider.dragging {
+  background: var(--accent);
+}
+
+.app.dragging {
+  user-select: none;
+  cursor: col-resize;
+}
+
 /* Mobile tabs (hidden on desktop) */
 .mobile-tabs {
   display: none;
@@ -345,6 +368,18 @@
 
   .sync-label {
     display: none;
+  }
+
+  .pane-collapse-btn {
+    display: none;
+  }
+
+  .pane-divider {
+    display: none;
+  }
+
+  .pane-divider + .pane {
+    border-top: 1px solid var(--border);
   }
 
   .editor-area {
